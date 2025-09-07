@@ -1,5 +1,6 @@
 - [x] Start GIT repo
 - [ ] database
+- [x] database env
 - [ ] crud for res
 - [ ] Redis for caching
 - [ ]
