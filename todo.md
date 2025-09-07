@@ -1,5 +1,5 @@
-- [ ] Start GIT repo
+- [x] Start GIT repo
 - [ ] database
-- [ ] crud for res 
+- [ ] crud for res
 - [ ] Redis for caching
-- [ ] 
+- [ ]
