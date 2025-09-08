@@ -12,14 +12,14 @@ import (
 	"github.com/jonaaldas/go-restaurant-crud/types"
 )
 
-func GetPlaces(location string, radius int, resType string) (types.GoogleAPIPlaceMaster, error) {
+func GetPlaces(latlong string, radius int, resType string) (types.GoogleAPIPlaceMaster, error) {
+	fmt.Print(latlong)
 	apiKey := os.Getenv("PLACES_API_KEY")
-	fmt.Print(apiKey)
 	if apiKey == "" {
 		return types.GoogleAPIPlaceMaster{}, fmt.Errorf("PLACES_API_KEY environment variable is not set")
 	}
 
-	url := "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + location + "&radius=" + strconv.Itoa(radius) + "&type=" + resType + "&key=" + apiKey
+	url := "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latlong + "&radius=" + strconv.Itoa(radius) + "&type=" + resType + "&key=" + apiKey
 	fmt.Printf("Request URL: %s\n", url)
 	resp, err := http.Get(url)
 
@@ -42,15 +42,33 @@ func GetPlaces(location string, radius int, resType string) (types.GoogleAPIPlac
 		return types.GoogleAPIPlaceMaster{}, err
 	}
 
-	fmt.Printf("API Response Status: %s\n", places.Status)
-	if places.ErrorMessage != "" {
-		fmt.Printf("Error Message: %s\n", places.ErrorMessage)
-	}
+	for i, place := range places.Results {
+		if i == 1 {
+			break
+		}
 
-	if places.Status != "OK" {
-		return types.GoogleAPIPlaceMaster{}, fmt.Errorf("Google Places API error: %s - %s", places.Status, places.ErrorMessage)
-	}
+		reviewsUrl := fmt.Sprintf("https://maps.googleapis.com/maps/api/place/details/json?place_id=%s&fields=name,reviews&key=%s", place.PlaceID, apiKey)
+		fmt.Printf("Reviews URL: %s\n", reviewsUrl)
+		reviewRes, err := http.Get(reviewsUrl)
+		if err != nil {
+			log.Fatal("Failed to get reviews:", err)
+			return types.GoogleAPIPlaceMaster{}, err
+		}
+		defer reviewRes.Body.Close()
 
-	fmt.Printf("Found %d places\n", len(places.Results))
+		reviewBody, err := io.ReadAll(reviewRes.Body)
+		if err != nil {
+			log.Fatal("Failed to read review body:", err)
+			return types.GoogleAPIPlaceMaster{}, err
+		}
+
+		var reviewResponse types.GoogleAPIPlaceMaster
+		if err := json.Unmarshal(reviewBody, &reviewResponse); err != nil {
+			log.Fatal("Failed to parse JSON:", err)
+			return types.GoogleAPIPlaceMaster{}, err
+		}
+
+		fmt.Printf("%+v\n", reviewResponse)
+	}
 	return places, nil
 }
