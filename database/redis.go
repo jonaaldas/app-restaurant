@@ -39,7 +39,6 @@ func SetRestaurant(ctx context.Context, redisDb *redis.Client, placeId string, r
 	return true
 }
 
-// get restaurant
 func GetRestaurant(ctx context.Context, redisDb *redis.Client, placeId string) (*types.Restaurant, error) {
 	key := fmt.Sprintf("restaurant_%s", placeId)
 	res, err := redisDb.Get(ctx, key).Result()

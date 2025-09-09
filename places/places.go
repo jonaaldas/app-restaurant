@@ -118,6 +118,24 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 		}
 	}()
 
+	go func() {
+		var wg sync.WaitGroup
+		for _, restaurant := range places {
+			wg.Add(1)
+			go func(r types.Restaurant) {
+				defer wg.Done()
+				success := database.SetRestaurant(ctx, redis, r.PlaceID, r)
+				if success {
+					log.Printf("Successfully cached individual restaurant %s", r.PlaceID)
+				} else {
+					log.Printf("Failed to cache individual restaurant %s", r.PlaceID)
+				}
+			}(restaurant)
+		}
+		wg.Wait()
+		log.Printf("Finished caching all %d individual restaurants", len(places))
+	}()
+
 	return places, nil
 }
 
@@ -140,7 +158,7 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		return types.Restaurant{}, fmt.Errorf("failed to parse reviews JSON for %s: %w", place.DisplayName.Text, err)
 	}
 
-	return types.Restaurant{
+	restaurant := types.Restaurant{
 		Name:   place.DisplayName.Text,
 		Rating: float32(place.Rating),
 		Photos: []types.Photo{},
@@ -151,5 +169,7 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		PlaceID:  place.ID,
 		WouldTry: false,
 		Reviews:  reviewResponse.Result,
-	}, nil
+	}
+
+	return restaurant, nil
 }

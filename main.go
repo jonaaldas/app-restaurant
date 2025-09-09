@@ -98,17 +98,28 @@ func main() {
 	})
 
 	app.Post("/api/save", func(c *fiber.Ctx) error {
-		r := new(types.Restaurant)
+		r := new(types.RestaurantId)
 
 		if err := c.BodyParser(r); err != nil {
 			return err
 		}
 
-		if c.Query("wouldTry") == "true" {
-			r.WouldTry = true
+		restaurant, err := database.GetRestaurant(context.Background(), rdb, r.PlaceID)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"message": "Restaurant not found",
+			})
 		}
 
-		err := database.InsertRestaurant(context.Background(), collection, *r)
+		err = database.InsertRestaurant(context.Background(), collection, types.Restaurant{
+			Name:     restaurant.Name,
+			Rating:   restaurant.Rating,
+			Photos:   restaurant.Photos,
+			Location: restaurant.Location,
+			PlaceID:  restaurant.PlaceID,
+			WouldTry: restaurant.WouldTry,
+			Reviews:  restaurant.Reviews,
+		})
 
 		if err != nil {
 			log.Println("Error saving restaurant:", err)

@@ -9,3 +9,7 @@ type Restaurant struct {
 	WouldTry bool                `json:"would_try"`
 	Reviews  GoogleReviewsResult `json:"reviews"`
 }
+
+type RestaurantId struct {
+	PlaceID string `json:"place_id"`
+}
