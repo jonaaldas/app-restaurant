@@ -1,6 +1,7 @@
 package places
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/jonaaldas/go-restaurant-crud/database"
 	"github.com/jonaaldas/go-restaurant-crud/types"
 )
 
@@ -17,6 +19,15 @@ func GetPlaces(latlong string, radius int, resType string) ([]types.Restaurant, 
 	apiKey := os.Getenv("PLACES_API_KEY")
 	if apiKey == "" {
 		return []types.Restaurant{}, fmt.Errorf("PLACES_API_KEY environment variable is not set")
+	}
+	ctx := context.Background()
+	redis := database.InitRedis() // Use existing connection
+	// Step 1: Try to get from cache
+	cachedRestaurants, found := database.GetSearch(ctx, redis, latlong, radius, resType)
+
+	if found {
+		log.Printf("Cache hit! Returning %d restaurants", len(cachedRestaurants))
+		return cachedRestaurants, nil
 	}
 
 	url := "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latlong + "&radius=" + strconv.Itoa(radius) + "&type=" + resType + "&key=" + apiKey
@@ -70,6 +81,16 @@ func GetPlaces(latlong string, radius int, resType string) ([]types.Restaurant, 
 	if len(errChan) > 0 {
 		return []types.Restaurant{}, <-errChan
 	}
+
+	// Cache the processed restaurant data with reviews
+	go func() {
+		success := database.SetSearch(ctx, redis, latlong, radius, resType, places)
+		if success {
+			log.Printf("Successfully cached %d restaurants", len(places))
+		} else {
+			log.Printf("Failed to cache restaurants")
+		}
+	}()
 
 	return places, nil
 }

@@ -50,14 +50,15 @@ type PlusCode struct {
 }
 
 type GoogleAPIPlaceMaster struct {
-	Results       []Place `json:"results"`
-	Status        string  `json:"status"`
-	NextPageToken string  `json:"next_page_token,omitempty"`
-	ErrorMessage  string  `json:"error_message,omitempty"`
+	Results       []Place               `json:"results"`
+	Status        string                `json:"status"`
+	NextPageToken string                `json:"next_page_token,omitempty"`
+	ErrorMessage  string                `json:"error_message,omitempty"`
+	Reviews       []GoogleReviewsReview `json:"reviews,omitempty"`
 }
 
 type GoogleReviewsReply struct {
-	HTMLAttributions []interface{}       `json:"html_attributions"` // Can be an empty array or contain strings, so interface{} is used
+	HTMLAttributions []interface{}       `json:"html_attributions"`
 	Result           GoogleReviewsResult `json:"result"`
 	Status           string              `json:"status"`
 }
