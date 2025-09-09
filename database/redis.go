@@ -60,24 +60,23 @@ func GetRestaurant(ctx context.Context, redisDb *redis.Client, placeId string) (
 	return &restaurant, nil
 }
 
-func SetSearch(ctx context.Context, redisDb *redis.Client, latlong string, radius int, resType string, restaurants []types.Restaurant) bool {
+func SetTextSearch(ctx context.Context, redisDb *redis.Client, cacheKey string, restaurants []types.Restaurant) bool {
 	jsonData, err := json.Marshal(restaurants)
 	if err != nil {
-		log.Printf("Failed to marshal restaurants: %v", err)
+		log.Printf("Failed to marshal restaurants for text search: %v", err)
 		return false
 	}
-	key := fmt.Sprintf("search_%s_%v_%s", latlong, radius, resType)
-	redisErr := redisDb.Set(ctx, key, jsonData, 7*24*time.Hour).Err()
+
+	redisErr := redisDb.Set(ctx, cacheKey, jsonData, 7*24*time.Hour).Err()
 	if redisErr != nil {
-		log.Printf("Redis set error: %v", redisErr)
+		log.Printf("Redis set error for text search: %v", redisErr)
 		return false
 	}
 	return true
 }
 
-func GetSearch(ctx context.Context, redisDb *redis.Client, latlong string, radius int, resType string) ([]types.Restaurant, bool) {
-	key := fmt.Sprintf("search_%s_%v_%s", latlong, radius, resType)
-	res, err := redisDb.Get(ctx, key).Result()
+func GetTextSearch(ctx context.Context, redisDb *redis.Client, cacheKey string) ([]types.Restaurant, bool) {
+	res, err := redisDb.Get(ctx, cacheKey).Result()
 
 	if err == redis.Nil {
 		// Cache miss - not an error, just not found
@@ -86,13 +85,13 @@ func GetSearch(ctx context.Context, redisDb *redis.Client, latlong string, radiu
 
 	if err != nil {
 		// Actual Redis error
-		log.Printf("Redis error: %v", err)
+		log.Printf("Redis error for text search: %v", err)
 		return []types.Restaurant{}, false
 	}
 
 	var restaurants []types.Restaurant
 	if err := json.Unmarshal([]byte(res), &restaurants); err != nil {
-		log.Printf("Unmarshal error: %v", err)
+		log.Printf("Unmarshal error for text search: %v", err)
 		return []types.Restaurant{}, false
 	}
 

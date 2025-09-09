@@ -14,8 +14,6 @@ import (
 	"github.com/jonaaldas/go-restaurant-crud/types"
 )
 
-// places, err := places.GetPlaces("41.45,2.2474", 1000, "restaurant")
-
 func main() {
 	envErr := godotenv.Load()
 	if envErr != nil {
@@ -53,25 +51,39 @@ func main() {
 	})
 
 	app.Get("/api/search", func(c *fiber.Ctx) error {
-		rad := c.Query("rad")
-		latlong := c.Query("latlong")
-		resType := c.Query("resType")
-		radNumber, err := strconv.Atoi(rad)
+		query := c.Query("query")
+		lat := c.Query("lat")
+		lng := c.Query("lng")
+		rad := c.Query("radius")
 
+		if query == "" || lat == "" || lng == "" || rad == "" {
+			return c.Status(400).JSON(fiber.Map{
+				"message": "Missing required parameters: query, lat, lng, radius",
+			})
+		}
+
+		latitude, err := strconv.ParseFloat(lat, 64)
 		if err != nil {
-			fmt.Printf("Error converting string to int: %v\n", err)
 			return c.Status(400).JSON(fiber.Map{
-				"message": "There was an error please reload the page.",
+				"message": "Invalid latitude value",
 			})
 		}
 
-		if rad == "" || latlong == "" || resType == "" {
+		longitude, err := strconv.ParseFloat(lng, 64)
+		if err != nil {
 			return c.Status(400).JSON(fiber.Map{
-				"message": "Missing required parameters",
+				"message": "Invalid longitude value",
 			})
 		}
 
-		places, err := places.GetPlaces(latlong, radNumber, resType)
+		radius, err := strconv.ParseFloat(rad, 64)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"message": "Invalid radius value",
+			})
+		}
+
+		restaurants, err := places.GetPlacesByText(query, latitude, longitude, radius)
 
 		if err != nil {
 			fmt.Print(err)
@@ -81,7 +93,7 @@ func main() {
 		}
 
 		return c.JSON(fiber.Map{
-			"data": places,
+			"data": restaurants,
 		})
 	})
 
