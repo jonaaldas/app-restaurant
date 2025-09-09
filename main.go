@@ -72,6 +72,7 @@ func main() {
 		}
 
 		places, err := places.GetPlaces(latlong, radNumber, resType)
+
 		if err != nil {
 			fmt.Print(err)
 			return c.Status(400).JSON(fiber.Map{

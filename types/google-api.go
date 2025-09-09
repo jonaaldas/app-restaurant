@@ -55,3 +55,35 @@ type GoogleAPIPlaceMaster struct {
 	NextPageToken string  `json:"next_page_token,omitempty"`
 	ErrorMessage  string  `json:"error_message,omitempty"`
 }
+
+type GoogleReviewsReply struct {
+	HTMLAttributions []interface{}       `json:"html_attributions"` // Can be an empty array or contain strings, so interface{} is used
+	Result           GoogleReviewsResult `json:"result"`
+	Status           string              `json:"status"`
+}
+
+type GoogleReviewsResult struct {
+	Photos  []GoogleReviewsPhoto  `json:"photos"`
+	Rating  float64               `json:"rating"`
+	Reviews []GoogleReviewsReview `json:"reviews"`
+}
+
+type GoogleReviewsPhoto struct {
+	Height           int      `json:"height"`
+	HTMLAttributions []string `json:"html_attributions"`
+	PhotoReference   string   `json:"photo_reference"`
+	Width            int      `json:"width"`
+}
+
+type GoogleReviewsReview struct {
+	AuthorName              string `json:"author_name"`
+	AuthorURL               string `json:"author_url"`
+	Language                string `json:"language"`
+	OriginalLanguage        string `json:"original_language"`
+	ProfilePhotoURL         string `json:"profile_photo_url"`
+	Rating                  int    `json:"rating"`
+	RelativeTimeDescription string `json:"relative_time_description"`
+	Text                    string `json:"text"`
+	Time                    int64  `json:"time"`
+	Translated              bool   `json:"translated"`
+}
