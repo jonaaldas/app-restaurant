@@ -11,5 +11,6 @@ type Restaurant struct {
 }
 
 type RestaurantId struct {
-	PlaceID string `json:"place_id"`
+	PlaceID  string `json:"place_id"`
+	WouldTry bool   `json:"would_try"`
 }
