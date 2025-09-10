@@ -12,9 +12,11 @@ import (
 )
 
 func InitMongo() (*mongo.Client, error) {
-	mongoURL := os.Getenv("MONGO_URL")
-	fmt.Print(mongoURL)
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+func InitMongo() (*mongo.Client, error) {
+    mongoURL := os.Getenv("MONGO_URL")
+    serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+    // …
+}
 	opts := options.Client().ApplyURI(mongoURL).SetServerAPIOptions(serverAPI)
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
