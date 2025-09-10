@@ -50,19 +50,26 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 		return []types.Restaurant{}, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	url := "https://places.googleapis.com/v1/places:searchText"
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return []types.Restaurant{}, fmt.Errorf("failed to create request: %w", err)
-	}
+        url := "https://places.googleapis.com/v1/places:searchText"
+        req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+        if err != nil {
+            return []types.Restaurant{}, fmt.Errorf("failed to create request: %w", err)
+        }
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Goog-Api-Key", apiKey)
-	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.userRatingCount")
+        req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("X-Goog-Api-Key", apiKey)
+        req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.userRatingCount")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
+       client := &http.Client{Timeout: 10 * time.Second}
+        resp, err := client.Do(req)
+        if err != nil {
+            log.Printf("Failed to make request: %v", err)
+            return []types.Restaurant{}, err
+        }
+        defer resp.Body.Close()
+       if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+           return []types.Restaurant{}, fmt.Errorf("text search HTTP %d", resp.StatusCode)
+       }
 		log.Printf("Failed to make request: %v", err)
 		return []types.Restaurant{}, err
 	}
