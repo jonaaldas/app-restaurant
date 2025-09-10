@@ -39,7 +39,8 @@ func InsertRestaurant(ctx context.Context, collection *mongo.Collection, restaur
 }
 
 func GetRestaurantFromMongo(ctx context.Context, collection *mongo.Collection, placeID string) (*types.Restaurant, error) {
-	filter := bson.M{"place_id": placeID}
+	filter := bson.M{"placeid": placeID}
+	fmt.Print(filter)
 
 	var restaurant types.Restaurant
 	err := collection.FindOne(ctx, filter).Decode(&restaurant)
@@ -70,4 +71,19 @@ func UpsertRestaurant(ctx context.Context, collection *mongo.Collection, restaur
 	}
 
 	return nil
+}
+
+func GetAllSavedRestaurants(ctx context.Context, collection *mongo.Collection) ([]types.Restaurant, error) {
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("error finding saved restaurants: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var restaurants []types.Restaurant
+	if err = cursor.All(ctx, &restaurants); err != nil {
+		return nil, fmt.Errorf("error decoding saved restaurants: %w", err)
+	}
+
+	return restaurants, nil
 }

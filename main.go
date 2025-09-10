@@ -16,16 +16,6 @@ func main() {
 	if envErr != nil {
 		log.Fatal("Error loading .env file")
 	}
-	rdb := database.InitRedis()
-	ctx := context.Background()
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		log.Printf("Redis connection failed: %v", err)
-	} else {
-		log.Println("Redis connected successfully")
-	}
-
-	defer rdb.Close()
 
 	mongoClient, err := database.InitMongo()
 
@@ -36,7 +26,9 @@ func main() {
 
 	dbName := "restaurant-app"
 	collectionName := "restaurants"
+	saved_restaurants := "saved_restaurants"
 	collection := mongoClient.Database(dbName).Collection(collectionName)
+	saved_restaurants_collection := mongoClient.Database(dbName).Collection(saved_restaurants)
 
 	defer func() {
 		if derr := mongoClient.Disconnect(context.Background()); derr != nil {
@@ -45,7 +37,7 @@ func main() {
 	}()
 
 	// Initialize handlers
-	h := handlers.NewHandlers(rdb, collection)
+	h := handlers.NewHandlers(collection, saved_restaurants_collection)
 
 	app := fiber.New()
 
@@ -62,7 +54,8 @@ func main() {
 	// save a restaurant by ID
 	app.Post("/api/save", h.SaveRestaurant)
 
-	// get all restaurants
+	// get all saved restaurants
+	app.Get("/api/restaurants", h.GetAllRestaurants)
 
 	err = godotenv.Load()
 	if err != nil {
