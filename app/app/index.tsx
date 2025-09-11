@@ -1,6 +1,7 @@
 import { Text, View } from '@/components/Themed';
 import { Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Button, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Colors from '@/constants/Colors';
 
 export default function Index() {
   return (
@@ -18,7 +19,7 @@ export default function Index() {
             <TextInput 
               style={styles.input} 
               placeholder='Search for a restaurant' 
-              placeholderTextColor='#7B8794'
+              placeholderTextColor={Colors.colors.gray}
             />
              <Pressable 
                style={({ pressed }) => [
@@ -84,57 +85,57 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: Colors.colors.navyOverlay,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.colors.white,
     textAlign: 'center',
     marginBottom: 8,
   },
   description: {
     textAlign: 'center',
     fontSize: 18,
-    color: 'white',
+    color: Colors.colors.white,
     marginBottom: 24,
     lineHeight: 24,
   },
   input: {
     width: '90%',
     height: 48,
-    borderColor: '#FF6B35',
-    color: '#192A56',
+    borderColor: Colors.colors.orange,
+    color: Colors.colors.navy,
     borderWidth: 2,
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: 'white',
+    backgroundColor: Colors.colors.white,
   },
   niceButton: {
     width: '90%',
     height: 52,
-    backgroundColor: '#FF6B35',
+    backgroundColor: Colors.colors.orange,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
-    shadowColor: '#FF6B35',
+    shadowColor: Colors.colors.orangeShadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 8,
   },
   niceButtonText: {
-    color: 'white',
+    color: Colors.colors.white,
     fontSize: 18,
     fontWeight: '600',
   },
   niceButtonSecondary: {
     width: '90%',
     height: 52,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderColor: 'white',
+    backgroundColor: Colors.colors.whiteTransparent,
+    borderColor: Colors.colors.white,
     borderWidth: 2,
     borderRadius: 16,
     justifyContent: 'center',
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   niceButtonTextSecondary: {
-    color: 'white',
+    color: Colors.colors.white,
     fontSize: 18,
     fontWeight: '600',
   },
