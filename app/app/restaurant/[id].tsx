@@ -1,10 +1,10 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
-import RestaurantCard from "@/components/RestaurantCard";
+import { useLocalSearchParams } from "expo-router";
+import { View, Text } from "react-native";
 import { Restaurant } from "@/types/restaurants";
-import { useEffect, useState } from "react";
-import { router } from "expo-router";
+import { useState } from "react";
 
-export default function Restaurants() {
+export default function Restaurant() {
+  const { id } = useLocalSearchParams(); 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([{
     name: "Mendocino Farms",
     rating: 4.8,
@@ -45,20 +45,10 @@ export default function Restaurants() {
     }], rating: 4.5, reviews: [] },
     formatted_address: "123 Main St, San Francisco, CA 94102, USA",
     }]); 
+  const restaurant = restaurants.find((res: Restaurant) => res.place_id === id);  
   return (
-    <ScrollView style={{ flex: 1 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 20 }}>Restaurants</Text>
-      <Text style={{ margin: 20 }}>Found {restaurants.length} restaurants</Text>
-      {restaurants.map((restaurant, index) => {
-        console.log('Mapping restaurant', index, restaurant.name);
-        return (
-          <Pressable key={restaurant.place_id} onPress={() => {
-            router.push({ pathname: "/restaurant/[id]", params: { id: restaurant.place_id } });
-          }}>
-            <RestaurantCard restaurant={restaurant} />
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+    <View>
+      <Text>Restaurant12121 {id}</Text>
+    </View>
   );
 }
