@@ -69,13 +69,14 @@ type TextSearchResponse struct {
 }
 
 type TextSearchPlace struct {
-	ID               string         `json:"id"`
-	FormattedAddress string         `json:"formattedAddress"`
-	Location         TextSearchLoc  `json:"location"`
-	Rating           float64        `json:"rating"`
-	PriceLevel       string         `json:"priceLevel,omitempty"`
-	UserRatingCount  int            `json:"userRatingCount"`
-	DisplayName      TextSearchName `json:"displayName"`
+	ID                    string         `json:"id"`
+	FormattedAddress      string         `json:"formattedAddress"`
+	ShortFormattedAddress string         `json:"shortFormattedAddress"`
+	Location              TextSearchLoc  `json:"location"`
+	Rating                float64        `json:"rating"`
+	PriceLevel            string         `json:"priceLevel,omitempty"`
+	UserRatingCount       int            `json:"userRatingCount"`
+	DisplayName           TextSearchName `json:"displayName"`
 }
 
 type TextSearchLoc struct {

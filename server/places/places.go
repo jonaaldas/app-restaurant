@@ -2,7 +2,6 @@ package places
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jonaaldas/go-restaurant-crud/database"
 	"github.com/jonaaldas/go-restaurant-crud/types"
 	"github.com/redis/go-redis/v9"
 )
@@ -21,17 +19,6 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 	apiKey := os.Getenv("PLACES_API_KEY")
 	if apiKey == "" {
 		return []types.Restaurant{}, fmt.Errorf("PLACES_API_KEY environment variable is not set")
-	}
-
-	ctx := context.Background()
-	redis := database.InitRedis()
-
-	cacheKey := fmt.Sprintf("text_search_%s_%.6f_%.6f_%.0f", textQuery, latitude, longitude, radius)
-	cachedRestaurants, found := database.GetTextSearch(ctx, redis, cacheKey)
-
-	if found {
-		log.Printf("Cache hit! Returning %d restaurants for text search", len(cachedRestaurants))
-		return cachedRestaurants, nil
 	}
 
 	requestBody := types.TextSearchRequest{
@@ -60,7 +47,7 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Goog-Api-Key", apiKey)
-	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.userRatingCount")
+	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.rating,places.priceLevel,places.userRatingCount,places.formattedAddress,places.shortFormattedAddress")
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -80,6 +67,9 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 		return []types.Restaurant{}, err
 	}
 
+	// Debug: print raw JSON response
+	fmt.Printf("Raw API Response: %s\n", string(body))
+
 	var textSearchResponse types.TextSearchResponse
 	if err := json.Unmarshal(body, &textSearchResponse); err != nil {
 		log.Printf("Failed to parse JSON: %v", err)
@@ -88,6 +78,9 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 
 	if len(textSearchResponse.Places) == 0 {
 		return []types.Restaurant{}, nil
+	}
+	for i, place := range textSearchResponse.Places {
+		fmt.Printf("Place %d: Name=%s, Address=%s, ShortAddress=%s\n", i, place.DisplayName.Text, place.FormattedAddress, place.ShortFormattedAddress)
 	}
 
 	places := make([]types.Restaurant, len(textSearchResponse.Places))
@@ -115,33 +108,6 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 		return []types.Restaurant{}, <-errChan
 	}
 
-	go func() {
-		success := database.SetTextSearch(ctx, redis, cacheKey, places)
-		if success {
-			log.Printf("Successfully cached %d restaurants for text search", len(places))
-		} else {
-			log.Printf("Failed to cache restaurants for text search")
-		}
-	}()
-
-	go func() {
-		var wg sync.WaitGroup
-		for _, restaurant := range places {
-			wg.Add(1)
-			go func(r types.Restaurant) {
-				defer wg.Done()
-				success := database.SetRestaurant(ctx, redis, r.PlaceID, r)
-				if success {
-					log.Printf("Successfully cached individual restaurant %s", r.PlaceID)
-				} else {
-					log.Printf("Failed to cache individual restaurant %s", r.PlaceID)
-				}
-			}(restaurant)
-		}
-		wg.Wait()
-		log.Printf("Finished caching all %d individual restaurants", len(places))
-	}()
-
 	return places, nil
 }
 
@@ -164,6 +130,12 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		return types.Restaurant{}, fmt.Errorf("failed to parse reviews JSON for %s: %w", place.DisplayName.Text, err)
 	}
 
+	// Use FormattedAddress if available, otherwise fall back to ShortFormattedAddress
+	address := place.FormattedAddress
+	if address == "" {
+		address = place.ShortFormattedAddress
+	}
+
 	restaurant := types.Restaurant{
 		Name:   place.DisplayName.Text,
 		Rating: float32(place.Rating),
@@ -172,10 +144,13 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 			Lat: place.Location.Latitude,
 			Lng: place.Location.Longitude,
 		},
-		PlaceID:  place.ID,
-		WouldTry: false,
-		Reviews:  reviewResponse.Result,
+		PlaceID:          place.ID,
+		WouldTry:         false,
+		Reviews:          reviewResponse.Result,
+		FormattedAddress: address,
+		PriceLevel:       place.PriceLevel,
 	}
 
+	fmt.Printf("Created restaurant: %s with address: %s (from %s/%s)\n", restaurant.Name, restaurant.FormattedAddress, place.FormattedAddress, place.ShortFormattedAddress)
 	return restaurant, nil
 }
