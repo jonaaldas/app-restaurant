@@ -2,6 +2,7 @@ import { Text, View } from '@/components/Themed';
 import { Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Button, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors';
+import { router } from 'expo-router';
 
 export default function Index() {
   return (
@@ -26,7 +27,9 @@ export default function Index() {
                  styles.niceButton,
                  { opacity: pressed ? 0.8 : 1 }
                ]} 
-               onPress={() => {}}
+               onPress={() => {
+                router.push('/restaurants');
+               }}
              >
                <Text style={styles.niceButtonText}>Search</Text>
              </Pressable>
