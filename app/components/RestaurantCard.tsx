@@ -1,14 +1,13 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { Restaurant } from "@/types/restaurants";
+import Colors from "@/constants/Colors";
 
 export default function RestaurantCard({
   restaurant,
 }: {
   restaurant: Restaurant;
 }) {
-  const imageSource = restaurant.photos && restaurant.photos.length > 0 
-    ? { uri: restaurant.photos[0].photo_reference }
-    : require('@/assets/images/res.jpg');
+  const imageSource = require('@/assets/images/res.jpg');
 
   return (
     <View style={styles.card}>
@@ -35,9 +34,20 @@ export default function RestaurantCard({
         </View>
         
         <View style={styles.statusRow}>
-          <Text style={styles.wouldTry}>
-            {restaurant.would_try ? '✅ Would Try' : '❌ Skip'}
-          </Text>
+          {
+            !restaurant.would_try && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.buttonWouldTry,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => {}}
+              >
+                <Text style={styles.buttonText}> ✅ Try</Text>
+              </Pressable>
+            )
+          }
           {restaurant.reviews.reviews.length > 0 && (
             <Text style={styles.reviewCount}>
               {restaurant.reviews.reviews.length} reviews
@@ -117,5 +127,28 @@ const styles = StyleSheet.create({
   reviewCount: {
     fontSize: 12,
     color: '#666',
+  },
+  button: {
+    padding: 8,
+    borderRadius: 6,
+  },
+  buttonWouldTry: {
+    backgroundColor: Colors.colors.orange,
+  },
+  buttonSkip: {
+    backgroundColor: Colors.colors.gray,
+  },
+  buttonPressed: {
+    opacity: 0.8,
+  },
+  buttonText: {
+    color: Colors.colors.white,
+    fontWeight: '500',
+  },
+  buttonTextWouldTry: {
+    color: Colors.colors.white,
+  },
+  buttonTextSkip: {
+    color: Colors.colors.white,
   },
 });
