@@ -5,11 +5,19 @@ type Location struct {
 	Lng float64 `json:"lng"`
 }
 
+type AuthorAttribution struct {
+	DisplayName string `json:"displayName"`
+	URI         string `json:"uri"`
+	PhotoURI    string `json:"photoUri"`
+}
+
 type Photo struct {
-	Height           int      `json:"height"`
-	HTMLAttributions []string `json:"html_attributions"`
-	PhotoReference   string   `json:"photo_reference"`
-	Width            int      `json:"width"`
+	Name               string              `json:"name"`
+	WidthPx            int                 `json:"widthPx"`
+	HeightPx           int                 `json:"heightPx"`
+	AuthorAttributions []AuthorAttribution `json:"authorAttributions"`
+	FlagContentURI     string              `json:"flagContentUri"`
+	GoogleMapsURI      string              `json:"googleMapsUri"`
 }
 
 type GoogleReviewsReply struct {
@@ -77,6 +85,7 @@ type TextSearchPlace struct {
 	PriceLevel            string         `json:"priceLevel,omitempty"`
 	UserRatingCount       int            `json:"userRatingCount"`
 	DisplayName           TextSearchName `json:"displayName"`
+	Photos                []Photo        `json:"photos,omitempty"`
 }
 
 type TextSearchLoc struct {

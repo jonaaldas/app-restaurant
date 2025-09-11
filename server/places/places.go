@@ -47,7 +47,7 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Goog-Api-Key", apiKey)
-	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.rating,places.priceLevel,places.userRatingCount,places.formattedAddress,places.shortFormattedAddress")
+	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.rating,places.priceLevel,places.userRatingCount,places.formattedAddress,places.shortFormattedAddress,places.photos")
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -68,7 +68,7 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 	}
 
 	// Debug: print raw JSON response
-	fmt.Printf("Raw API Response: %s\n", string(body))
+	fmt.Printf("Raw API Response: %s\n", string(body[:min(len(body), 1000)]))
 
 	var textSearchResponse types.TextSearchResponse
 	if err := json.Unmarshal(body, &textSearchResponse); err != nil {
@@ -80,7 +80,7 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 		return []types.Restaurant{}, nil
 	}
 	for i, place := range textSearchResponse.Places {
-		fmt.Printf("Place %d: Name=%s, Address=%s, ShortAddress=%s\n", i, place.DisplayName.Text, place.FormattedAddress, place.ShortFormattedAddress)
+		fmt.Printf("Place %d: Name=%s, Photos=%+v, Address=%s\n", i, place.DisplayName.Text, place.Photos, place.FormattedAddress)
 	}
 
 	places := make([]types.Restaurant, len(textSearchResponse.Places))
@@ -139,7 +139,7 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 	restaurant := types.Restaurant{
 		Name:   place.DisplayName.Text,
 		Rating: float32(place.Rating),
-		Photos: []types.Photo{},
+		Photos: place.Photos,
 		Location: types.Location{
 			Lat: place.Location.Latitude,
 			Lng: place.Location.Longitude,
@@ -151,6 +151,5 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		PriceLevel:       place.PriceLevel,
 	}
 
-	fmt.Printf("Created restaurant: %s with address: %s (from %s/%s)\n", restaurant.Name, restaurant.FormattedAddress, place.FormattedAddress, place.ShortFormattedAddress)
 	return restaurant, nil
 }
