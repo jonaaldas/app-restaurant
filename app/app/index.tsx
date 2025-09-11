@@ -1,5 +1,5 @@
 import { Text, View } from '@/components/Themed';
-import { Image, StyleSheet, TextInput } from 'react-native';
+import { Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
@@ -7,17 +7,22 @@ export default function Index() {
     <View style={styles.container}>
       <Image resizeMode='cover' source={require('@/assets/images/res.jpg')} style={styles.image} />
       <View style={styles.overlay} />
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content} lightColor="transparent" darkColor="transparent">
-          <Text style={styles.title}>Discover Amazing Restaurants</Text>
-          <Text style={styles.description}>Find your next favorite dining experience in your neighborhood</Text>
-          <TextInput 
-            style={styles.input} 
-            placeholder='Search for a restaurant' 
-            placeholderTextColor='black'
-          />
-        </View>
-      </SafeAreaView>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.content} lightColor="transparent" darkColor="transparent">
+            <Text style={styles.title}>Discover Amazing Restaurants</Text>
+            <Text style={styles.description}>Find your next favorite dining experience in your neighborhood</Text>
+            <TextInput 
+              style={styles.input} 
+              placeholder='Search for a restaurant' 
+              placeholderTextColor='black'
+            />
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -26,6 +31,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative',
+  },
+  keyboardView: {
+    flex: 1,
   },
   safeArea: {
     flex: 1,
