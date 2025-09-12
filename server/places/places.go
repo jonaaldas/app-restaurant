@@ -47,7 +47,7 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Goog-Api-Key", apiKey)
-	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.rating,places.priceLevel,places.userRatingCount,places.formattedAddress,places.shortFormattedAddress,places.photos")
+	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.rating,places.priceLevel,places.userRatingCount,places.formattedAddress,places.shortFormattedAddress,places.photos,places.googleMapsUri,places.websiteUri,places.currentOpeningHours")
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -67,9 +67,6 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 		return []types.Restaurant{}, err
 	}
 
-	// Debug: print raw JSON response
-	fmt.Printf("Raw API Response: %s\n", string(body[:min(len(body), 1000)]))
-
 	var textSearchResponse types.TextSearchResponse
 	if err := json.Unmarshal(body, &textSearchResponse); err != nil {
 		log.Printf("Failed to parse JSON: %v", err)
@@ -78,9 +75,6 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 
 	if len(textSearchResponse.Places) == 0 {
 		return []types.Restaurant{}, nil
-	}
-	for i, place := range textSearchResponse.Places {
-		fmt.Printf("Place %d: Name=%s, Photos=%+v, Address=%s\n", i, place.DisplayName.Text, place.Photos, place.FormattedAddress)
 	}
 
 	places := make([]types.Restaurant, len(textSearchResponse.Places))
@@ -138,7 +132,7 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 
 	restaurant := types.Restaurant{
 		Name:   place.DisplayName.Text,
-		Rating: float32(place.Rating),
+		Rating: place.Rating,
 		Photos: place.Photos,
 		Location: types.Location{
 			Lat: place.Location.Latitude,
@@ -149,6 +143,13 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		Reviews:          reviewResponse.Result,
 		FormattedAddress: address,
 		PriceLevel:       place.PriceLevel,
+		WebsiteURI:       place.WebsiteURI,
+		GoogleMapsURI:    place.GoogleMapsURI,
+		CurrentOpeningHours: types.CurrentOpeningHours{
+			OpenNow:             place.CurrentOpeningHours.OpenNow,
+			WeekdayDescriptions: place.CurrentOpeningHours.WeekdayDescriptions,
+			NextCloseTime:       place.CurrentOpeningHours.NextCloseTime,
+		},
 	}
 
 	return restaurant, nil

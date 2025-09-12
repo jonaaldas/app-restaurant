@@ -77,15 +77,18 @@ type TextSearchResponse struct {
 }
 
 type TextSearchPlace struct {
-	ID                    string         `json:"id"`
-	FormattedAddress      string         `json:"formattedAddress"`
-	ShortFormattedAddress string         `json:"shortFormattedAddress"`
-	Location              TextSearchLoc  `json:"location"`
-	Rating                float64        `json:"rating"`
-	PriceLevel            string         `json:"priceLevel,omitempty"`
-	UserRatingCount       int            `json:"userRatingCount"`
-	DisplayName           TextSearchName `json:"displayName"`
-	Photos                []Photo        `json:"photos,omitempty"`
+	ID                    string                    `json:"id"`
+	FormattedAddress      string                    `json:"formattedAddress"`
+	ShortFormattedAddress string                    `json:"shortFormattedAddress"`
+	Location              TextSearchLoc             `json:"location"`
+	Rating                float64                   `json:"rating"`
+	PriceLevel            string                    `json:"priceLevel,omitempty"`
+	UserRatingCount       int                       `json:"userRatingCount"`
+	DisplayName           TextSearchName            `json:"displayName"`
+	Photos                []Photo                   `json:"photos,omitempty"`
+	GoogleMapsURI         string                    `json:"googleMapsUri"`
+	WebsiteURI            string                    `json:"websiteUri"`
+	CurrentOpeningHours   GoogleCurrentOpeningHours `json:"currentOpeningHours"`
 }
 
 type TextSearchLoc struct {
@@ -96,4 +99,16 @@ type TextSearchLoc struct {
 type TextSearchName struct {
 	Text         string `json:"text"`
 	LanguageCode string `json:"languageCode"`
+}
+
+type GoogleCurrentOpeningHours struct {
+	OpenNow             bool     `json:"openNow"`
+	WeekdayDescriptions []string `json:"weekdayDescriptions"`
+	NextCloseTime       string   `json:"nextCloseTime"`
+}
+
+type CurrentOpeningHours struct {
+	OpenNow             bool     `json:"open_now"`
+	WeekdayDescriptions []string `json:"weekday_descriptions"`
+	NextCloseTime       string   `json:"next_close_time"`
 }

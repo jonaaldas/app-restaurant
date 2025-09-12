@@ -7,7 +7,7 @@ export default function RestaurantCard({
 }: {
   restaurant: Restaurant;
 }) {
-  const imageSource = require('@/assets/images/res.jpg');
+  const imageSource = restaurant.photos[0]?.name ? { uri: restaurant.photos[0].name } : require('@/assets/images/res.jpg');
 
   return (
     <View style={styles.card}>

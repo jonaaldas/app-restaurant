@@ -3,11 +3,19 @@ interface Location {
   lng: number;
 }
 
+interface AuthorAttribution {
+  displayName: string;
+  uri: string;
+  photoUri: string;
+}
+
 interface Photo {
-  height: number;
-  html_attributions: string[];
-  photo_reference: string;
-  width: number;
+  name: string;
+  widthPx: number;
+  heightPx: number;
+  authorAttributions: AuthorAttribution[];
+  flagContentUri: string;
+  googleMapsUri: string;
 }
 
 interface GoogleReviewsPhoto {
@@ -36,6 +44,12 @@ interface GoogleReviewsResult {
   reviews: GoogleReviewsReview[];
 }
 
+interface CurrentOpeningHours {
+  open_now: boolean;
+  weekday_descriptions: string[];
+  next_close_time: string;
+}
+
 interface Restaurant {
   name: string;
   rating: number;
@@ -45,6 +59,10 @@ interface Restaurant {
   would_try: boolean;
   reviews: GoogleReviewsResult;
   formatted_address: string;
+  price_level: string;
+  website_uri: string;
+  google_maps_uri: string;
+  current_opening_hours: CurrentOpeningHours;
 }
 
 interface RestaurantId {
