@@ -54,22 +54,7 @@ type GoogleReviewsReview struct {
 
 // New Google Places API v1 Text Search Types
 type TextSearchRequest struct {
-	TextQuery    string       `json:"textQuery"`
-	LocationBias LocationBias `json:"locationBias"`
-}
-
-type LocationBias struct {
-	Circle Circle `json:"circle"`
-}
-
-type Circle struct {
-	Center Center  `json:"center"`
-	Radius float64 `json:"radius"`
-}
-
-type Center struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	TextQuery string `json:"textQuery"`
 }
 
 type TextSearchResponse struct {

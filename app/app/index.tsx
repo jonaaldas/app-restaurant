@@ -1,47 +1,78 @@
-import { Text, View } from '@/components/Themed';
-import { Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Button, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '@/constants/Colors';
-import { router } from 'expo-router';
+import { Text, View } from "@/components/Themed";
+import {
+  Image,
+  StyleSheet,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Button,
+  Pressable,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Colors from "@/constants/Colors";
+import { router } from "expo-router";
+import { useRestaurantContext } from "@/app/useContext/restaurant";
+import { useState } from "react";
+import { SearchParams } from "@/types/restaurants";
 
 export default function Index() {
+  const { searchRestaurants } = useRestaurantContext();
+  const [textInputValue, setTextInputValue] = useState("");
   return (
     <View style={styles.container}>
-      <Image resizeMode='cover' source={require('@/assets/images/res.jpg')} style={styles.image} />
+      <Image
+        resizeMode="cover"
+        source={require("@/assets/images/res.jpg")}
+        style={styles.image}
+      />
       <View style={styles.overlay} />
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         <SafeAreaView style={styles.safeArea}>
-          <View style={styles.content} lightColor="transparent" darkColor="transparent">
+          <View
+            style={styles.content}
+            lightColor="transparent"
+            darkColor="transparent"
+          >
             <Text style={styles.title}>Discover Amazing Restaurants</Text>
-            <Text style={styles.description}>Find your next favorite dining experience in your neighborhood</Text>
-            <TextInput 
-              style={styles.input} 
-              placeholder='Search for a restaurant' 
+            <Text style={styles.description}>
+              Find your next favorite dining experience in your neighborhood
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Search for a restaurant"
               placeholderTextColor={Colors.colors.gray}
+              value={textInputValue}
+              onChangeText={(text) => {
+                setTextInputValue(text);
+              }}
             />
-             <Pressable 
-               style={({ pressed }) => [
-                 styles.niceButton,
-                 { opacity: pressed ? 0.8 : 1 }
-               ]} 
-               onPress={() => {
-                router.push('/restaurants');
-               }}
-             >
-               <Text style={styles.niceButtonText}>Search</Text>
-             </Pressable>
-             <Pressable 
-               style={({ pressed }) => [
-                 styles.niceButtonSecondary,
-                 { opacity: pressed ? 0.8 : 1 }
-               ]} 
-               onPress={() => {}}
-             >
-               <Text style={styles.niceButtonTextSecondary}>Saved Restaurants</Text>
-             </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.niceButton,
+                { opacity: pressed ? 0.8 : 1 },
+              ]}
+              onPress={async () => {
+                await searchRestaurants({
+                  query: textInputValue,
+                } as SearchParams);
+              }}  
+            >
+              <Text style={styles.niceButtonText}>Search</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.niceButtonSecondary,
+                { opacity: pressed ? 0.8 : 1 },
+              ]}
+              onPress={() => {}}
+            >
+              <Text style={styles.niceButtonTextSecondary}>
+                Saved Restaurants
+              </Text>
+            </Pressable>
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
@@ -52,38 +83,38 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   keyboardView: {
     flex: 1,
   },
   safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
-    display: 'flex',
-    width: '100%',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    width: "100%",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 32,
     paddingHorizontal: 20,
   },
   image: {
-    height: '100%',
-    width: '100%',
-    position: 'absolute',
+    height: "100%",
+    width: "100%",
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
   overlay: {
-    height: '100%',
-    width: '100%',
-    position: 'absolute',
+    height: "100%",
+    width: "100%",
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -92,20 +123,20 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.colors.white,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 8,
   },
   description: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
     color: Colors.colors.white,
     marginBottom: 24,
     lineHeight: 24,
   },
   input: {
-    width: '90%',
+    width: "90%",
     height: 48,
     borderColor: Colors.colors.orange,
     color: Colors.colors.navy,
@@ -116,12 +147,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.colors.white,
   },
   niceButton: {
-    width: '90%',
+    width: "90%",
     height: 52,
     backgroundColor: Colors.colors.orange,
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 20,
     shadowColor: Colors.colors.orangeShadow,
     shadowOffset: { width: 0, height: 4 },
@@ -132,22 +163,22 @@ const styles = StyleSheet.create({
   niceButtonText: {
     color: Colors.colors.white,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   niceButtonSecondary: {
-    width: '90%',
+    width: "90%",
     height: 52,
     backgroundColor: Colors.colors.whiteTransparent,
     borderColor: Colors.colors.white,
     borderWidth: 2,
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 12,
   },
   niceButtonTextSecondary: {
     color: Colors.colors.white,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

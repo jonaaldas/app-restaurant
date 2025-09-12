@@ -15,7 +15,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func GetPlacesByText(textQuery string, latitude float64, longitude float64, radius float64, redisClient *redis.Client) ([]types.Restaurant, error) {
+func GetPlacesByText(textQuery string, redisClient *redis.Client) ([]types.Restaurant, error) {
 	apiKey := os.Getenv("PLACES_API_KEY")
 	if apiKey == "" {
 		return []types.Restaurant{}, fmt.Errorf("PLACES_API_KEY environment variable is not set")
@@ -23,15 +23,6 @@ func GetPlacesByText(textQuery string, latitude float64, longitude float64, radi
 
 	requestBody := types.TextSearchRequest{
 		TextQuery: textQuery,
-		LocationBias: types.LocationBias{
-			Circle: types.Circle{
-				Center: types.Center{
-					Latitude:  latitude,
-					Longitude: longitude,
-				},
-				Radius: radius,
-			},
-		},
 	}
 
 	jsonBody, err := json.Marshal(requestBody)

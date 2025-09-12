@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jonaaldas/go-restaurant-crud/database"
@@ -28,38 +27,8 @@ func NewHandlers(mongoCollection *mongo.Collection, mongoSavedRestaurantCollecti
 // SearchRestaurants handles GET /api/search
 func (h *Handlers) SearchRestaurants(c *fiber.Ctx) error {
 	query := c.Query("query")
-	lat := c.Query("lat")
-	lng := c.Query("lng")
-	rad := c.Query("radius")
 
-	if query == "" || lat == "" || lng == "" || rad == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"message": "Missing required parameters: query, lat, lng, radius",
-		})
-	}
-
-	latitude, err := strconv.ParseFloat(lat, 64)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"message": "Invalid latitude value",
-		})
-	}
-
-	longitude, err := strconv.ParseFloat(lng, 64)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"message": "Invalid longitude value",
-		})
-	}
-
-	radius, err := strconv.ParseFloat(rad, 64)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"message": "Invalid radius value",
-		})
-	}
-
-	restaurants, err := places.GetPlacesByText(query, latitude, longitude, radius, nil)
+	restaurants, err := places.GetPlacesByText(query, nil)
 
 	if err != nil {
 		fmt.Print(err)
@@ -114,15 +83,11 @@ func (h *Handlers) SaveRestaurant(c *fiber.Ctx) error {
 
 	err := database.InsertRestaurant(context.Background(), h.MongoSavedRestaurantCollection, *r)
 	if err != nil {
-		return c.Status(404).JSON(fiber.Map{
-			"message": "Error Saving Restaurant",
+		log.Println("Error saving restaurant:", err)
+		return c.Status(500).JSON(fiber.Map{
+			"message": "Error saving restaurant",
 			"placeID": r.PlaceID,
 		})
-	}
-
-	if err != nil {
-		log.Println("Error saving restaurant:", err)
-		return c.Status(500).JSON(fiber.Map{"message": "Error saving restaurant"})
 	}
 
 	return c.JSON(fiber.Map{

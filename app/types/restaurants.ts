@@ -1,3 +1,7 @@
+export interface SearchParams {
+  query: string;
+}
+
 interface Location {
   lat: number;
   lng: number;
