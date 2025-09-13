@@ -2,7 +2,7 @@ import { Restaurant, SearchParams } from "@/types/restaurants";
 import { createContext, useContext, useState, ReactNode } from "react";
 import { searchRestaurants } from "@/utils/restaurants";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
@@ -23,13 +23,16 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  const pathname = usePathname();
   const searchRestaurantsMutation = useMutation({
     mutationFn: (params: SearchParams) => searchRestaurants(params),
     onSuccess: (val: Restaurant[]) => {
       queryClient.invalidateQueries({ queryKey: ["search-restaurants"] });
       setRestaurants(val);
-      router.push("/restaurants");
+      
+      if (pathname !== "/restaurants") {
+          router.push("/restaurants");
+      }
     },
     onError: (error) => {
       console.error("Search restaurants error:", error);

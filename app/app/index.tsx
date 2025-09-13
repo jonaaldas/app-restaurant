@@ -52,7 +52,7 @@ export default function Index() {
             <Pressable
               style={({ pressed }) => [
                 styles.niceButton,
-                { 
+                {
                   opacity: pressed || isSearching ? 0.9 : 1,
                 },
               ]}
