@@ -97,3 +97,9 @@ type CurrentOpeningHours struct {
 	WeekdayDescriptions []string `json:"weekday_descriptions"`
 	NextCloseTime       string   `json:"next_close_time"`
 }
+
+// Google Places Photo Media API
+type GooglePhotoResponse struct {
+	Name     string `json:"name"`
+	PhotoUri string `json:"photoUri"`
+}

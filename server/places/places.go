@@ -63,6 +63,7 @@ func GetPlacesByText(textQuery string, redisClient *redis.Client) ([]types.Resta
 		log.Printf("Failed to parse JSON: %v", err)
 		return []types.Restaurant{}, err
 	}
+	fmt.Println("Text search response: ", textSearchResponse)
 
 	if len(textSearchResponse.Places) == 0 {
 		return []types.Restaurant{}, nil
@@ -77,9 +78,9 @@ func GetPlacesByText(textQuery string, redisClient *redis.Client) ([]types.Resta
 		go func(index int, p types.TextSearchPlace) {
 			defer wg.Done()
 
-			restaurant, err := fetchTextSearchPlaceWithReviews(p, apiKey)
-			if err != nil {
-				errChan <- err
+			restaurant, reviewsErr := fetchTextSearchPlaceWithReviews(p, apiKey)
+			if reviewsErr != nil {
+				errChan <- reviewsErr
 				return
 			}
 			places[index] = restaurant
@@ -97,7 +98,7 @@ func GetPlacesByText(textQuery string, redisClient *redis.Client) ([]types.Resta
 }
 
 func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string) (types.Restaurant, error) {
-	reviewsUrl := fmt.Sprintf("https://maps.googleapis.com/maps/api/place/details/json?place_id=%s&fields=reviews,rating&key=%s", place.ID, apiKey)
+	reviewsUrl := fmt.Sprintf("https://maps.googleapis.com/maps/api/place/details/json?place_id=%s&fields=reviews,rating,photos&key=%s", place.ID, apiKey)
 
 	reviewRes, err := http.Get(reviewsUrl)
 	if err != nil {
@@ -121,10 +122,62 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		address = place.ShortFormattedAddress
 	}
 
+	// fetch photos for entire place concurrently
+	var photos []types.GooglePhotoResponse
+	if len(place.Photos) > 0 {
+		photoResults := make([]types.GooglePhotoResponse, len(place.Photos))
+		var photoWg sync.WaitGroup
+		photoErrChan := make(chan error, len(place.Photos))
+
+		for i, photo := range place.Photos {
+			photoWg.Add(1)
+			go func(index int, p types.Photo) {
+				defer photoWg.Done()
+
+				url := fmt.Sprintf("https://places.googleapis.com/v1/%s/media?key=%s&maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true", p.Name, apiKey)
+				res, err := http.Get(url)
+				if err != nil {
+					photoErrChan <- fmt.Errorf("failed to get photo for %s: %w", place.DisplayName.Text, err)
+					return
+				}
+				defer res.Body.Close()
+
+				body, err := io.ReadAll(res.Body)
+				if err != nil {
+					photoErrChan <- fmt.Errorf("failed to read photo response for %s: %w", place.DisplayName.Text, err)
+					return
+				}
+
+				fmt.Printf("Photo %d body: %s\n", index, string(body))
+
+				var photoResponse types.GooglePhotoResponse
+				if err := json.Unmarshal(body, &photoResponse); err != nil {
+					photoErrChan <- fmt.Errorf("failed to parse photo JSON for %s: %w", place.DisplayName.Text, err)
+					return
+				}
+
+				photoResults[index] = photoResponse
+			}(i, photo)
+		}
+
+		photoWg.Wait()
+		close(photoErrChan)
+
+		if len(photoErrChan) > 0 {
+			return types.Restaurant{}, <-photoErrChan
+		}
+
+		for _, photoResult := range photoResults {
+			if photoResult.Name != "" || photoResult.PhotoUri != "" {
+				photos = append(photos, photoResult)
+			}
+		}
+	}
+
 	restaurant := types.Restaurant{
 		Name:   place.DisplayName.Text,
 		Rating: place.Rating,
-		Photos: place.Photos,
+		Photos: photos,
 		Location: types.Location{
 			Lat: place.Location.Latitude,
 			Lng: place.Location.Longitude,
@@ -144,4 +197,39 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 	}
 
 	return restaurant, nil
+}
+
+func fetchMasterPhotos(place types.TextSearchPlace, apiKey string) (types.GooglePhotoResponse, error) {
+	for _, photo := range place.Photos {
+		url := fmt.Sprint("https://places.googleapis.com/v1/places/%s/photos/%s/media?key=%s&maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true", place.ID, photo.Name, apiKey)
+		res, err := http.Get(url)
+		if err != nil {
+			return types.GooglePhotoResponse{}, fmt.Errorf("failed to get photo for %s: %w", place.DisplayName.Text, err)
+		}
+		defer res.Body.Close()
+		body, _ := io.ReadAll(res.Body)
+		var jsonResponse types.GooglePhotoResponse
+		if err := json.Unmarshal(body, &jsonResponse); err != nil {
+			return types.GooglePhotoResponse{}, fmt.Errorf("failed to parse photo JSON for %s: %w", place.DisplayName.Text, err)
+		}
+	}
+	return types.GooglePhotoResponse{}, nil
+}
+
+func fetchPhotoFromReviews(place types.Restaurant, apiKey string) (types.GooglePhotoResponse, error) {
+	// URL to get photo from reviews
+	for _, photos := range place.Reviews.Photos {
+		url := fmt.Sprint("https://places.googleapis.com/v1/places/%s/photos/%s/media?key=%s&maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true", place.PlaceID, photos.PhotoReference, apiKey)
+		res, err := http.Get(url)
+		if err != nil {
+			return types.GooglePhotoResponse{}, err
+		}
+		defer res.Body.Close()
+		body, _ := io.ReadAll(res.Body)
+		var photos types.GooglePhotoResponse
+		if err := json.Unmarshal(body, &photos); err != nil {
+			return types.GooglePhotoResponse{}, err
+		}
+	}
+	return types.GooglePhotoResponse{}, nil
 }
