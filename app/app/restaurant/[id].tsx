@@ -18,6 +18,7 @@ import {
 import { Restaurant } from "@/types/restaurants";
 import { Ionicons } from "@expo/vector-icons";
 import { useRestaurantContext } from "@/app/useContext/restaurant";
+import Colors from "@/constants/Colors";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -130,17 +131,6 @@ export default function RestaurantDetail() {
           ))}
         </ScrollView>
 
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="close" size={24} color="white" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.shareButton} >
-          <Ionicons name="share-outline" size={24} color="white" />
-        </TouchableOpacity>
-
         <View style={styles.pagination}>
           {coverImages.map((_, index) => (
             <View
@@ -153,6 +143,18 @@ export default function RestaurantDetail() {
           ))}
         </View>
       </Animated.View>
+
+      {/* Fixed Navigation Buttons */}
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="close" size={24} color="white" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.shareButton} >
+        <Ionicons name="share-outline" size={24} color="white" />
+      </TouchableOpacity>
 
       {/* Main Content with Scroll Listener */}
       <Animated.ScrollView
@@ -167,13 +169,6 @@ export default function RestaurantDetail() {
         contentContainerStyle={{ paddingTop: headerHeight }}
       >
         <View style={styles.restaurantInfo}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={{ uri: restaurant.photos[0]?.photoUri }}
-              style={styles.logo}
-            />
-          </View>
-
           <Text style={styles.restaurantName}>{restaurant.name}</Text>
           <Text style={styles.cuisineType}>{restaurant.formatted_address}</Text>
           <View style={styles.statusContainer}>
@@ -189,22 +184,32 @@ export default function RestaurantDetail() {
               </Text>
             ))}
           </View>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.reserveButton}
-              onPress={() => Linking.openURL(restaurant.google_maps_uri)}
-            >
-              <Ionicons name="map-outline" size={20} color="white" />
-              <Text style={styles.googleLink}>Google Maps</Text>
-            </TouchableOpacity>
+          <View style={styles.buttonsContainer}>
+            {/* First Row */}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.gridButton, styles.googleMapsButton]}
+                onPress={() => Linking.openURL(restaurant.google_maps_uri)}
+              >
+                <Ionicons name="map-outline" size={20} color="white" />
+                <Text style={styles.googleMapsText}>Google Maps</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.connectedButton}
-              onPress={() => Linking.openURL(restaurant.website_uri)}
-            >
-              <Ionicons name="globe-outline" size={20} color="black" />
-              <Text style={styles.website}>Website</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.gridButton, styles.websiteButton]}
+                onPress={() => Linking.openURL(restaurant.website_uri)}
+              >
+                <Ionicons name="globe-outline" size={20} color="black" />
+                <Text style={styles.websiteText}>Website</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Second Row */}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity style={[styles.gridButton, styles.yesButton]}>
+                <Text style={styles.yesButtonText}>Yes, I want to try</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Reviews Section */}
@@ -279,7 +284,7 @@ export default function RestaurantDetail() {
                   <Text style={styles.reviewText}>{currentReview.text}</Text>
                   <View style={styles.reviewMeta}>
                     <Text style={styles.reviewAuthor}>
-                      — {currentReview.author_name}
+                      — {currentReview.author_name} - {currentReview.rating} ⭐
                     </Text>
                     <Text style={styles.reviewTime}>
                       {currentReview.relative_time_description}
@@ -330,6 +335,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   shareButton: {
     position: "absolute",
@@ -341,6 +347,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   pagination: {
     position: "absolute",
@@ -368,6 +375,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
+    paddingTop: 40,
     marginTop: -20,
     minHeight: screenHeight,
   },
@@ -410,14 +418,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 8,
   },
-  actionButtons: {
+  buttonsContainer: {
+    marginBottom: 24,
+    gap: 12,
+  },
+  buttonRow: {
     flexDirection: "row",
     gap: 12,
-    marginBottom: 24,
   },
-  reserveButton: {
+  gridButton: {
     flex: 1,
-    backgroundColor: "#000",
     borderRadius: 25,
     paddingVertical: 14,
     flexDirection: "row",
@@ -425,24 +435,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  googleLink: {
+  googleMapsButton: {
+    backgroundColor: "#000",
+  },
+  websiteButton: {
+    backgroundColor: "white",
+    borderWidth: 1.5,
+    borderColor: "#000",
+  },
+  yesButton: {
+    backgroundColor: Colors.colors.orange,
+  },
+  noButton: {
+    backgroundColor: "white",
+    borderWidth: 1.5,
+    borderColor: "#000",
+  },
+  googleMapsText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
   },
-  connectedButton: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 25,
-    paddingVertical: 14,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: "#000",
+  websiteText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "600",
   },
-  website: {
+  yesButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  noButtonText: {
     color: "#000",
     fontSize: 16,
     fontWeight: "600",

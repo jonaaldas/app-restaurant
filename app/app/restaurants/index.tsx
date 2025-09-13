@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import RestaurantCard from "@/components/RestaurantCard";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRestaurantContext } from "@/app/useContext/restaurant";
 
 export default function Restaurants() {
-  const { restaurants } = useRestaurantContext();
+  const { restaurants, isSearching } = useRestaurantContext();
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -24,19 +24,29 @@ export default function Restaurants() {
       </View>
       
       <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 20 }}>Restaurants</Text>
-      <Text style={{ margin: 20, marginTop: 0 }}>Found {restaurants.length} restaurants</Text>
       
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        {restaurants.map((restaurant, index) => {
-          return (
-            <Pressable key={restaurant.place_id} onPress={() => {
-              router.push({ pathname: "/restaurant/[id]", params: { id: restaurant.place_id } });
-            }}>
-              <RestaurantCard restaurant={restaurant} />
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      {isSearching ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Searching for restaurants...</Text>
+        </View>
+      ) : (
+        <>
+          <Text style={{ margin: 20, marginTop: 0 }}>Found {restaurants.length} restaurants</Text>
+          
+          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+            {restaurants.map((restaurant, index) => {
+              return (
+                <Pressable key={restaurant.place_id} onPress={() => {
+                  router.push({ pathname: "/restaurant/[id]", params: { id: restaurant.place_id } });
+                }}>
+                  <RestaurantCard restaurant={restaurant} />
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -58,5 +68,16 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: 100,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#666",
   },
 });

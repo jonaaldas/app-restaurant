@@ -7,16 +7,16 @@ import {
   Platform,
   Button,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "@/constants/Colors";
-import { router } from "expo-router";
 import { useRestaurantContext } from "@/app/useContext/restaurant";
 import { useState } from "react";
 import { SearchParams } from "@/types/restaurants";
 
 export default function Index() {
-  const { searchRestaurants } = useRestaurantContext();
+  const { searchRestaurants, isSearching } = useRestaurantContext();
   const [textInputValue, setTextInputValue] = useState("");
   return (
     <View style={styles.container}>
@@ -52,15 +52,24 @@ export default function Index() {
             <Pressable
               style={({ pressed }) => [
                 styles.niceButton,
-                { opacity: pressed ? 0.8 : 1 },
+                { 
+                  opacity: pressed || isSearching ? 0.9 : 1,
+                },
               ]}
-              onPress={async () => {
-                await searchRestaurants({
-                  query: textInputValue,
-                } as SearchParams);
-              }}  
+              onPress={() => {
+                if (!isSearching && textInputValue.trim()) {
+                  searchRestaurants({
+                    query: textInputValue,
+                  } as SearchParams);
+                }
+              }}
+              disabled={isSearching || !textInputValue.trim()}
             >
-              <Text style={styles.niceButtonText}>Search</Text>
+              {isSearching ? (
+                <ActivityIndicator size="small" color={Colors.colors.white} />
+              ) : (
+                <Text style={styles.niceButtonText}>Search</Text>
+              )}
             </Pressable>
             <Pressable
               style={({ pressed }) => [

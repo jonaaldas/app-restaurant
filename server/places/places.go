@@ -133,7 +133,7 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 			go func(index int, p types.Photo) {
 				defer photoWg.Done()
 
-				url := fmt.Sprintf("https://places.googleapis.com/v1/%s/media?key=%s&maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true", p.Name, apiKey)
+				url := fmt.Sprintf("https://places.googleapis.com/v1/%s/media?key=%s&maxHeightPx=1080&maxWidthPx=1920&skipHttpRedirect=true", p.Name, apiKey)
 				res, err := http.Get(url)
 				if err != nil {
 					photoErrChan <- fmt.Errorf("failed to get photo for %s: %w", place.DisplayName.Text, err)
@@ -222,7 +222,7 @@ func fetchReviewPhotosData(reviewPhotos []types.GoogleReviewsPhoto, apiKey strin
 			defer photoWg.Done()
 
 			// Make API call to get actual photo data
-			url := fmt.Sprintf("https://maps.googleapis.com/maps/api/place/photo?photoreference=%s&key=%s&maxwidth=400&maxheight=400", photo.PhotoReference, apiKey)
+			url := fmt.Sprintf("https://maps.googleapis.com/maps/api/place/photo?photoreference=%s&key=%s&maxwidth=1920&maxheight=1080", photo.PhotoReference, apiKey)
 
 			res, err := http.Get(url)
 			if err != nil {

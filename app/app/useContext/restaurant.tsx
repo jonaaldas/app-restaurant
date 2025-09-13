@@ -8,6 +8,7 @@ interface RestaurantContextType {
   restaurants: Restaurant[];
   searchRestaurants: (params: SearchParams) => void;
   getRestaurantById: (placeId: string) => Promise<Restaurant | null>;
+  isSearching: boolean;
 }
 
 export const RestaurantContext = createContext<
@@ -44,6 +45,7 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
     restaurants,
     searchRestaurants: searchRestaurantsMutation.mutate,
     getRestaurantById,
+    isSearching: searchRestaurantsMutation.isPending,
   };
 
   return (
