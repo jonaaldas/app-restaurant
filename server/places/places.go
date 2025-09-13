@@ -196,6 +196,15 @@ func fetchTextSearchPlaceWithReviews(place types.TextSearchPlace, apiKey string)
 		},
 	}
 
+	// Fetch additional photos from reviews concurrently
+	reviewPhotos, reviewPhotoErr := fetchPhotoFromReviews(restaurant, apiKey)
+	if reviewPhotoErr != nil {
+		log.Printf("Failed to fetch review photos for %s: %v", restaurant.Name, reviewPhotoErr)
+	} else {
+		// Combine place photos with review photos
+		restaurant.Photos = append(restaurant.Photos, reviewPhotos...)
+	}
+
 	return restaurant, nil
 }
 
@@ -216,20 +225,54 @@ func fetchMasterPhotos(place types.TextSearchPlace, apiKey string) (types.Google
 	return types.GooglePhotoResponse{}, nil
 }
 
-func fetchPhotoFromReviews(place types.Restaurant, apiKey string) (types.GooglePhotoResponse, error) {
-	// URL to get photo from reviews
-	for _, photos := range place.Reviews.Photos {
-		url := fmt.Sprint("https://places.googleapis.com/v1/places/%s/photos/%s/media?key=%s&maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true", place.PlaceID, photos.PhotoReference, apiKey)
-		res, err := http.Get(url)
-		if err != nil {
-			return types.GooglePhotoResponse{}, err
-		}
-		defer res.Body.Close()
-		body, _ := io.ReadAll(res.Body)
-		var photos types.GooglePhotoResponse
-		if err := json.Unmarshal(body, &photos); err != nil {
-			return types.GooglePhotoResponse{}, err
+func fetchPhotoFromReviews(place types.Restaurant, apiKey string) ([]types.GooglePhotoResponse, error) {
+	if len(place.Reviews.Photos) == 0 {
+		return []types.GooglePhotoResponse{}, nil
+	}
+
+	// Fetch photos from reviews concurrently
+	photoResults := make([]types.GooglePhotoResponse, len(place.Reviews.Photos))
+	var photoWg sync.WaitGroup
+	photoErrChan := make(chan error, len(place.Reviews.Photos))
+
+	for i, reviewPhoto := range place.Reviews.Photos {
+		photoWg.Add(1)
+		go func(index int, photo types.GoogleReviewsPhoto) {
+			defer photoWg.Done()
+
+			url := fmt.Sprintf("https://maps.googleapis.com/maps/api/place/photo?photoreference=%s&key=%s&maxwidth=400&maxheight=400", photo.PhotoReference, apiKey)
+			res, err := http.Get(url)
+			if err != nil {
+				photoErrChan <- fmt.Errorf("failed to get review photo for %s: %w", place.Name, err)
+				return
+			}
+			defer res.Body.Close()
+
+			// For Google Maps API, we get the actual photo URL from the response URL after redirects
+			// or we can use the direct URL
+			photoResponse := types.GooglePhotoResponse{
+				Name:     fmt.Sprintf("review_photo_%d", index),
+				PhotoUri: url, // Use the API URL directly since it serves the image
+			}
+
+			photoResults[index] = photoResponse
+		}(i, reviewPhoto)
+	}
+
+	photoWg.Wait()
+	close(photoErrChan)
+
+	if len(photoErrChan) > 0 {
+		return []types.GooglePhotoResponse{}, <-photoErrChan
+	}
+
+	// Filter out empty results
+	var validPhotos []types.GooglePhotoResponse
+	for _, photoResult := range photoResults {
+		if photoResult.Name != "" || photoResult.PhotoUri != "" {
+			validPhotos = append(validPhotos, photoResult)
 		}
 	}
-	return types.GooglePhotoResponse{}, nil
+
+	return validPhotos, nil
 }
