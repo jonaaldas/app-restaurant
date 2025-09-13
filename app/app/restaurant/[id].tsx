@@ -14,11 +14,14 @@ import {
   NativeSyntheticEvent,
   Animated,
   Linking,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Restaurant } from "@/types/restaurants";
 import { Ionicons } from "@expo/vector-icons";
 import { useRestaurantContext } from "@/app/useContext/restaurant";
 import Colors from "@/constants/Colors";
+import { saveRestaurant } from "@/utils/restaurants";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -32,7 +35,7 @@ export default function RestaurantDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerHeight = screenHeight * 0.55;
-  const { restaurants } = useRestaurantContext();
+  const { restaurants, saveRestaurant, isSaving, restaurantsIds } = useRestaurantContext();
 
   const restaurant = restaurants.find(
     (res: Restaurant) => res.place_id === idParam
@@ -206,8 +209,31 @@ export default function RestaurantDetail() {
 
             {/* Second Row */}
             <View style={styles.buttonRow}>
-              <TouchableOpacity style={[styles.gridButton, styles.yesButton]}>
-                <Text style={styles.yesButtonText}>Yes, I want to try</Text>
+              <TouchableOpacity 
+                style={[
+                  styles.gridButton, 
+                  styles.yesButton,
+                  isSaving && styles.savingButton
+                ]} 
+                onPress={() => {
+                  if (!isSaving) {
+                    saveRestaurant(restaurant.place_id);
+                  }
+                }}
+                disabled={isSaving || restaurantsIds.includes(restaurant.place_id)}
+              >
+                {isSaving ? (
+                  <View style={styles.savingContainer}>
+                    <ActivityIndicator size="small" color={Colors.colors.white} />
+                    <Text style={styles.yesButtonText}>Saving...</Text>
+                  </View>
+                ) : (
+                  restaurantsIds.includes(restaurant.place_id) ? (
+                    <Text style={styles.yesButtonText}>Saved! 🎉</Text>
+                    ) : (
+                  <Text style={styles.yesButtonText}>Yes, I want to try</Text>
+                  )
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -445,6 +471,16 @@ const styles = StyleSheet.create({
   },
   yesButton: {
     backgroundColor: Colors.colors.orange,
+  },
+  savingButton: {
+    backgroundColor: Colors.colors.gray,
+    opacity: 0.8,
+  },
+  savingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
   noButton: {
     backgroundColor: "white",

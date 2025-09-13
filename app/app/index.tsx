@@ -16,7 +16,7 @@ import { useState } from "react";
 import { SearchParams } from "@/types/restaurants";
 
 export default function Index() {
-  const { searchRestaurants, isSearching } = useRestaurantContext();
+  const { searchRestaurants, isSearching, restaurantsIds } = useRestaurantContext();
   const [textInputValue, setTextInputValue] = useState("");
   return (
     <View style={styles.container}>
@@ -61,6 +61,7 @@ export default function Index() {
                   searchRestaurants({
                     query: textInputValue,
                   } as SearchParams);
+                  setTextInputValue("");
                 }
               }}
               disabled={isSearching || !textInputValue.trim()}

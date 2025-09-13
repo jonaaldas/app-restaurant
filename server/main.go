@@ -62,6 +62,9 @@ func main() {
 	// get all saved restaurants
 	app.Get("/api/restaurants", h.GetAllRestaurants)
 
+	// get all restaurants ids
+	app.Get("/api/restaurants/ids", h.GetAllRestaurantsIds)
+
 	err = godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

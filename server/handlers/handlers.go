@@ -110,3 +110,18 @@ func (h *Handlers) GetAllRestaurants(c *fiber.Ctx) error {
 		"count": len(restaurants),
 	})
 }
+
+// GetAllRestaurantsIds handles GET /api/restaurants/ids
+func (h *Handlers) GetAllRestaurantsIds(c *fiber.Ctx) error {
+	// fetch all restaurants IDs from Mongo.
+	restaurants, err := database.GetAllRestaurantsId(context.Background(), h.MongoSavedRestaurantCollection)
+	if err != nil {
+		log.Printf("Error getting saved restaurants ids: %v", err)
+		return c.Status(500).JSON(fiber.Map{
+			"message": "Error retrieving saved restaurants ids",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"data": restaurants,
+	})
+}

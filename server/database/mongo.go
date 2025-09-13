@@ -87,3 +87,31 @@ func GetAllSavedRestaurants(ctx context.Context, collection *mongo.Collection) (
 
 	return restaurants, nil
 }
+
+func GetAllRestaurantsId(ctx context.Context, collection *mongo.Collection) ([]string, error) {
+	cursor, err := collection.Find(ctx, bson.M{})
+
+	if err != nil {
+		return nil, fmt.Errorf("error finding restaurants: %w", err)
+	}
+
+	defer cursor.Close(ctx)
+
+	var ids []string
+
+	for cursor.Next(ctx) {
+		var result struct {
+			PlaceID string `bson:"placeid"`
+		}
+		if err := cursor.Decode(&result); err != nil {
+			return nil, fmt.Errorf("error decoding restaurant: %w", err)
+		}
+		ids = append(ids, result.PlaceID)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, fmt.Errorf("cursor error: %w", err)
+	}
+
+	return ids, nil
+}

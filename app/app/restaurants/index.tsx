@@ -17,7 +17,7 @@ import { TextInput } from "react-native";
 import { useState } from "react";
 import { SearchParams } from "@/types/restaurants";
 export default function Restaurants() {
-  const { restaurants, isSearching, searchRestaurants } = useRestaurantContext();
+  const { restaurants, isSearching, searchRestaurants, restaurantsIds } = useRestaurantContext();
   const [textInputValue, setTextInputValue] = useState("");
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -76,6 +76,7 @@ export default function Restaurants() {
               searchRestaurants({
                 query: textInputValue,
               } as SearchParams);
+              setTextInputValue("");
             }
           }}
           disabled={isSearching || !textInputValue.trim()}

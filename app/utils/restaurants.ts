@@ -13,6 +13,14 @@ interface SearchResponse {
   data: Restaurant[];
 }
 
+interface SaveRestaurantRes {
+  data: string
+}
+
+interface GetAllRestaurantsWithIdsRes {
+  data: string[]
+}
+
 export const searchRestaurants = async (params: SearchParams): Promise<Restaurant[]> => {
   const response: SearchResponse = await api('/search', {
     query: {
@@ -21,3 +29,21 @@ export const searchRestaurants = async (params: SearchParams): Promise<Restauran
   })
   return response.data;
 }
+
+export const saveRestaurant = async (restaurant: Restaurant) =>{
+  try {
+    const response: SaveRestaurantRes = await api("/save", {
+      method: "POST",
+      body: restaurant,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export const fetchAllRestaurantsWithIds = async () => {
+  const response: GetAllRestaurantsWithIdsRes = await api("/restaurants/ids");
+  return response.data;
+};

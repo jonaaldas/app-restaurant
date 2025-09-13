@@ -1,14 +1,17 @@
 import { Restaurant, SearchParams } from "@/types/restaurants";
 import { createContext, useContext, useState, ReactNode } from "react";
-import { searchRestaurants } from "@/utils/restaurants";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { searchRestaurants, saveRestaurant, fetchAllRestaurantsWithIds } from "@/utils/restaurants";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "expo-router";
+import { Alert } from "react-native";
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
   searchRestaurants: (params: SearchParams) => void;
-  getRestaurantById: (placeId: string) => Promise<Restaurant | null>;
+  saveRestaurant: (restaurantId: string) => void;
+  restaurantsIds: string[] | [];
   isSearching: boolean;
+  isSaving: boolean;
 }
 
 export const RestaurantContext = createContext<
@@ -21,6 +24,7 @@ interface RestaurantProviderProps {
 
 export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurantsIds, setRestaurantsIds] = useState<string[]>([]); 
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();
@@ -29,7 +33,6 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
     onSuccess: (val: Restaurant[]) => {
       queryClient.invalidateQueries({ queryKey: ["search-restaurants"] });
       setRestaurants(val);
-      
       if (pathname !== "/restaurants") {
           router.push("/restaurants");
       }
@@ -39,16 +42,53 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
     }
   });
 
-  const getRestaurantById = async (placeId: string): Promise<Restaurant | null> => {
-    // TODO: Implement
-    return null;
-  };
+  useQuery({
+    queryKey: ['restaurants-ids'], 
+    queryFn: async () => {
+      const res = await fetchAllRestaurantsWithIds();
+      setRestaurantsIds(res);
+      return res;
+    }, 
+    enabled: true 
+  })
+
+  const saveRestaurantMutation = useMutation({
+    mutationFn: (restaurantId: string) => {
+      const restaurant = restaurants.find((restaurant) => restaurant.place_id === restaurantId);
+      console.log(restaurant);
+      if (!restaurant) {
+        throw new Error("Restaurant not found");
+      }
+      return saveRestaurant(restaurant);
+    },
+    onSuccess: (data, restaurantId: string) => {
+      queryClient.invalidateQueries({ queryKey: [`saved-${restaurantId}`] });
+      const restaurant = restaurants.find((r) => r.place_id === restaurantId);
+      Alert.alert(
+        "Restaurant Saved! 🎉",
+        `${restaurant?.name || "Restaurant"} has been added to your saved list.`,
+        [{ text: "OK", style: "default" }]
+      );
+      queryClient.invalidateQueries({ queryKey: ['restaurants-ids'] });
+    },
+    onError: (error) => {
+      console.log(error);
+      console.error("Save restaurant error:", error);
+      Alert.alert(
+        "Save Failed",
+        "Something went wrong while saving the restaurant. Please try again.",
+        [{ text: "OK", style: "default" }]
+      );
+    }
+  });
 
   const value: RestaurantContextType = {
     restaurants,
     searchRestaurants: searchRestaurantsMutation.mutate,
-    getRestaurantById,
+    saveRestaurant: saveRestaurantMutation.mutate,
+    restaurantsIds: restaurantsIds,
     isSearching: searchRestaurantsMutation.isPending,
+    isSaving: saveRestaurantMutation.isPending,
   };
 
   return (
