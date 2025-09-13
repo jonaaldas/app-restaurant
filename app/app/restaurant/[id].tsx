@@ -43,7 +43,7 @@ export default function RestaurantDetail() {
 
   if (!restaurant) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.conttainer}>
         <Text>Restaurant not found</Text>
       </SafeAreaView>
     );

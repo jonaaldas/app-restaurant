@@ -47,3 +47,8 @@ export const fetchAllRestaurantsWithIds = async () => {
   const response: GetAllRestaurantsWithIdsRes = await api("/restaurants/ids");
   return response.data;
 };
+
+export const fetchSavedRestaurants = async (): Promise<Restaurant[]> => {
+  const response: SearchResponse = await api("/restaurants");
+  return response.data;
+};

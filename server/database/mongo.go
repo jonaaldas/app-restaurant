@@ -115,3 +115,18 @@ func GetAllRestaurantsId(ctx context.Context, collection *mongo.Collection) ([]s
 
 	return ids, nil
 }
+
+func CreateUniqueIndexOnPlaceID(ctx context.Context, collection *mongo.Collection) error {
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "place_id", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err := collection.Indexes().CreateOne(ctx, indexModel)
+	if err != nil {
+		return fmt.Errorf("error creating unique index on place_id: %w", err)
+	}
+
+	fmt.Println("Successfully created unique index on place_id field")
+	return nil
+}

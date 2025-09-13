@@ -35,6 +35,11 @@ func main() {
 	collection := mongoClient.Database(dbName).Collection(collectionName)
 	saved_restaurants_collection := mongoClient.Database(dbName).Collection(saved_restaurants)
 
+	// Create unique index on place_id field for saved restaurants
+	if err := database.CreateUniqueIndexOnPlaceID(context.Background(), saved_restaurants_collection); err != nil {
+		log.Printf("Warning: Could not create unique index on place_id: %v", err)
+	}
+
 	defer func() {
 		if derr := mongoClient.Disconnect(context.Background()); derr != nil {
 			log.Printf("Mongo disconnect error: %v", derr)

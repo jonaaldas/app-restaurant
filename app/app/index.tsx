@@ -14,6 +14,7 @@ import Colors from "@/constants/Colors";
 import { useRestaurantContext } from "@/app/useContext/restaurant";
 import { useState } from "react";
 import { SearchParams } from "@/types/restaurants";
+import { router } from "expo-router";
 
 export default function Index() {
   const { searchRestaurants, isSearching, restaurantsIds } = useRestaurantContext();
@@ -77,7 +78,7 @@ export default function Index() {
                 styles.niceButtonSecondary,
                 { opacity: pressed ? 0.8 : 1 },
               ]}
-              onPress={() => {}}
+              onPress={() => router.push("/saved")}
             >
               <Text style={styles.niceButtonTextSecondary}>
                 Saved Restaurants
