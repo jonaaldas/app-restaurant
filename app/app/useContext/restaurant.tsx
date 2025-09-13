@@ -26,7 +26,6 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
   const searchRestaurantsMutation = useMutation({
     mutationFn: (params: SearchParams) => searchRestaurants(params),
     onSuccess: (val: Restaurant[]) => {
-      console.log("Search restaurants mutation success", val);
       queryClient.invalidateQueries({ queryKey: ["search-restaurants"] });
       setRestaurants(val);
       router.push("/restaurants");

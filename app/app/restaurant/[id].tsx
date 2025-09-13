@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { Restaurant } from "@/types/restaurants";
 import { Ionicons } from "@expo/vector-icons";
+import { useRestaurantContext } from "@/app/useContext/restaurant";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -30,179 +31,7 @@ export default function RestaurantDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerHeight = screenHeight * 0.55;
-
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([
-    {
-      name: "Málà Project 123123 12312",
-      rating: 4.8,
-      photos: [
-        {
-          name: "https://images.unsplash.com/photo-1555992336-03a23c7b20ee?w=800",
-          widthPx: 800,
-          heightPx: 600,
-          authorAttributions: [
-            {
-              displayName: "Málà Project",
-              uri: "https://maps.google.com/maps/contrib/123456789",
-              photoUri:
-                "https://lh3.googleusercontent.com/a/default-user=s100-p-k-no-mo",
-            },
-          ],
-          flagContentUri:
-            "https://www.google.com/local/imagery/report/?cb_client=maps_api_places",
-          googleMapsUri:
-            "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipNUcNnGRjpZdekgoMW5g3ns6F24qhy1as-7XN2I!2e10",
-        },
-        {
-          name: "https://images.unsplash.com/photo-1555992336-03a23c7b20ee?w=800",
-          widthPx: 800,
-          heightPx: 600,
-          authorAttributions: [
-            {
-              displayName: "Málà Project",
-              uri: "https://maps.google.com/maps/contrib/123456789",
-              photoUri:
-                "https://lh3.googleusercontent.com/a/default-user=s100-p-k-no-mo",
-            },
-          ],
-          flagContentUri:
-            "https://www.google.com/local/imagery/report/?cb_client=maps_api_places",
-          googleMapsUri:
-            "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipNUcNnGRjpZdekgoMW5g3ns6F24qhy1as-7XN2I!2e10",
-        },
-      ],
-      location: { lat: 0, lng: 0 },
-      place_id: "123",
-      would_try: false,
-      reviews: {
-        photos: [
-          {
-            height: 0,
-            html_attributions: [],
-            photo_reference:
-              "https://images.unsplash.com/photo-1555992336-03a23c7b20ee?w=800",
-            width: 0,
-          },
-          {
-            height: 0,
-            html_attributions: [],
-            photo_reference:
-              "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800",
-            width: 0,
-          },
-          {
-            height: 0,
-            html_attributions: [],
-            photo_reference:
-              "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800",
-            width: 0,
-          },
-        ],
-        rating: 4.5,
-        reviews: [
-          {
-            author_name: "John Doe",
-            author_url: "",
-            language: "en",
-            original_language: "en",
-            profile_photo_url: "",
-            rating: 5,
-            relative_time_description: "2 weeks ago",
-            text: "Mala Project brings the fiery flavors of Sichuan dry pot to NYC, offering a customizable, spice-packed experience. With bold aromatics and a hip, cozy vibe, it's a must-visit for heat seekers.",
-            time: Date.now(),
-            translated: false,
-          },
-          {
-            author_name: "Jane Smith",
-            author_url: "",
-            language: "en",
-            original_language: "en",
-            profile_photo_url: "",
-            rating: 4,
-            relative_time_description: "1 month ago",
-            text: "Amazing authentic Sichuan cuisine! The customizable dry pot is fantastic and the spice level is perfect. Highly recommend for spice lovers.",
-            time: Date.now(),
-            translated: false,
-          },
-          {
-            author_name: "Mike Johnson",
-            author_url: "",
-            language: "en",
-            original_language: "en",
-            profile_photo_url: "",
-            rating: 5,
-            relative_time_description: "3 weeks ago",
-            text: "Best Sichuan food in East Village! The atmosphere is great and the food is incredibly flavorful. Don't miss their signature dishes!",
-            time: Date.now(),
-            translated: false,
-          },
-        ],
-      },
-      formatted_address: "Chinese / $$ / East Village",
-      price_level: "$$",
-      website_uri: "https://www.mala-project.com",
-      google_maps_uri: "https://www.google.com/maps/place/Mala+Project",
-      current_opening_hours: {
-        open_now: true,
-        weekday_descriptions: [
-          "Monday - Friday: 11:00 AM - 10:00 PM",
-          "Saturday - Sunday: 10:00 AM - 11:00 PM",
-        ],
-        next_close_time: "11:00 PM",
-      },
-    },
-    {
-      name: "Mendocino Farms",
-      rating: 4.8,
-      photos: [
-        {
-          name: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
-          widthPx: 800,
-          heightPx: 600,
-          authorAttributions: [
-            {
-              displayName: "Mendocino Farms",
-              uri: "https://maps.google.com/maps/contrib/987654321",
-              photoUri:
-                "https://lh3.googleusercontent.com/a/default-user2=s100-p-k-no-mo",
-            },
-          ],
-          flagContentUri:
-            "https://www.google.com/local/imagery/report/?cb_client=maps_api_places",
-          googleMapsUri:
-            "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipNUcNnGRjpZdekgoMW5g3ns6F24qhy1as-7XN2I!2e10",
-        },
-      ],
-      location: { lat: 0, lng: 0 },
-      place_id: "1243",
-      would_try: true,
-      reviews: {
-        photos: [
-          {
-            height: 0,
-            html_attributions: [],
-            photo_reference:
-              "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
-            width: 0,
-          },
-        ],
-        rating: 4.5,
-        reviews: [],
-      },
-      formatted_address: "American / $$ / West Village",
-      price_level: "$$",
-      website_uri: "https://www.mendocinofarms.com",
-      google_maps_uri: "https://www.google.com/maps/place/Mendocino+Farms",
-      current_opening_hours: {
-        open_now: true,
-        weekday_descriptions: [
-          "Monday - Friday: 11:00 AM - 10:00 PM",
-          "Saturday - Sunday: 10:00 AM - 11:00 PM",
-        ],
-        next_close_time: "11:00 PM",
-      },
-    },
-  ]);
+  const { restaurants } = useRestaurantContext();
 
   const restaurant = restaurants.find(
     (res: Restaurant) => res.place_id === idParam
@@ -216,7 +45,7 @@ export default function RestaurantDetail() {
     );
   }
 
-  const coverImages = restaurant.photos.map((photo) => photo.name);
+  const coverImages = restaurant.photos.map((photo) => photo.photoUri);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [reviewImageIndex, setReviewImageIndex] = useState(0);
 
@@ -340,7 +169,7 @@ export default function RestaurantDetail() {
         <View style={styles.restaurantInfo}>
           <View style={styles.logoContainer}>
             <Image
-              source={{ uri: restaurant.photos[0]?.name }}
+              source={{ uri: restaurant.photos[0]?.photoUri }}
               style={styles.logo}
             />
           </View>
@@ -351,11 +180,15 @@ export default function RestaurantDetail() {
             <Text style={styles.closedText}>
               {restaurant.current_opening_hours.open_now ? "Open" : "Closed"}
             </Text>
-            <Text style={styles.openTime}>
-              • Opens {restaurant.current_opening_hours.weekday_descriptions[0]}
-            </Text>
           </View>
 
+          <View style={styles.openTimeContainer}>
+                        {restaurant.current_opening_hours.weekday_descriptions.map((desc, idx) => (
+              <Text key={idx} style={styles.openTime}>
+                • {desc}
+              </Text>
+            ))}
+          </View>
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={styles.reserveButton}
@@ -711,5 +544,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     fontStyle: "italic",
+  },
+  openTimeContainer: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    marginBottom: 20,
+    gap: 8,
   },
 });

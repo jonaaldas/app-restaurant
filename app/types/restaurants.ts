@@ -15,11 +15,7 @@ interface AuthorAttribution {
 
 interface Photo {
   name: string;
-  widthPx: number;
-  heightPx: number;
-  authorAttributions: AuthorAttribution[];
-  flagContentUri: string;
-  googleMapsUri: string;
+  photoUri: string;
 }
 
 interface GoogleReviewsPhoto {
