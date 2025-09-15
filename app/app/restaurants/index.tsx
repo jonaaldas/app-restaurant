@@ -36,8 +36,11 @@ export default function Restaurants() {
           <Ionicons name="close" size={24} color="white" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.shareButton}>
-          <Ionicons name="share-outline" size={24} color="white" />
+        <TouchableOpacity 
+          style={styles.shareButton}
+          onPress={() => router.push("/saved")}
+        >
+          <Ionicons name="bookmark" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
