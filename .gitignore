@@ -1,1 +1,269 @@
+# ===================================
+# MASTER .GITIGNORE
+# For Restaurant App (Go Server + React Native/Expo App)
+# ===================================
+
+# ===================================
+# ENVIRONMENT & SECRETS
+# ===================================
 .env
+.env.local
+.env*.local
+server/.env
+app/.env
+*.pem
+
+# ===================================
+# OPERATING SYSTEM
+# ===================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ===================================
+# GO SERVER (Backend)
+# ===================================
+# Binaries
+server/*.exe
+server/*.exe~
+server/*.dll
+server/*.so
+server/*.dylib
+server/go-restaurant-crud
+server/main
+server/tmp/
+server/build-errors.log
+
+# Go specific
+server/vendor/
+server/coverage.txt
+server/coverage.out
+server/*.test
+server/*.prof
+
+# Air (Go live reload)
+server/.air.toml
+server/tmp/
+
+# ===================================
+# REACT NATIVE / EXPO APP (Frontend)
+# ===================================
+# Dependencies
+app/node# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+_modules/
+app/npm-debug.log*
+app/yarn-debug.log*
+app/yarn-error.log*
+
+# Expo
+app/.expo/
+app/dist/
+app/web-build/
+app/expo-env.d.ts
+
+# React Native
+app/android/app/build/
+app/android/build/
+app/android/.gradle/
+app/android/local.properties
+app/android/keystore.properties
+app/ios/build/
+app/ios/Pods/
+app/ios/Podfile.lock
+app/ios/*.xcworkspace/xcuserdata/
+app/ios/*.xcodeproj/xcuserdata/
+
+# Native builds
+app/.kotlin/
+app/android/.gradle/
+app/ios/build/
+
+# Certificates & Keys
+app/*.orig.*
+app/*.jks
+app/*.p8
+app/*.p12
+app/*.key
+app/*.mobileprovision
+app/*.keystore
+
+# Metro bundler
+app/.metro-health-check*
+app/metro.config.js.bak
+
+# TypeScript
+app/*.tsbuildinfo
+app/.tscache/
+
+# Testing
+app/coverage/
+app/.nyc_output/
+
+# ===================================
+# IDEs & EDITORS
+# ===================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*.tmp
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ===================================
+# LOGS & DATABASES
+# ===================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ===================================
+# MISCELLANEOUS
+# ===================================
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# Compressed files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Ignore build artifacts
+build/
+dist/
+
+# ===================================
+# PROJECT SPECIFIC
+# ===================================
+# Any additional project-specific ignores
+todo.md
+notes.txt
+scratch/
